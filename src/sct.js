@@ -24,8 +24,8 @@ let reInsert = RegExp([
 		// 4
 		';\\s*' + reExpression + '\\s*',
 		'|',
-		// 5?, 6?, 7?, 8
-		'\\?(\\?)?(?:\\s*(?:(!)|(' + reName + ')\\s*=))?\\s*' + rePath + '\\s*',
+		// 5?, 6?, 7, 8?
+		'\\?(\\?)?\\s*(!)?\\s*' + rePath + '\\s*(?::(' + reName + ')\\s*)?',
 		'|',
 		// 9
 		'(\\?)\\?',
@@ -34,13 +34,13 @@ let reInsert = RegExp([
 		'(\\/)\\?[\\s\\S]*?',
 		'|',
 		// 11, 12, 13?
-		'~\\s*' + rePath + '\\s*:(' + reName + ')(?:\\s*:(' + reName + '))?\\s*',
+		'~\\s*' + rePath + '\\s*:(' + reName + ')\\s*(?::(' + reName + ')\\s*)?',
 		'|',
 		// 14
 		'(\\/)~[\\s\\S]*?',
 		'|',
 		// 15, 16?
-		'@\\s*(' + reName + ')(?:\\s*:(' + reName + '(?:\\s*:' + reName + ')*))?\\s*',
+		'@\\s*(' + reName + ')\\s*(?::(' + reName + '\\s*(?::' + reName + '\\s*)*))?',
 		'|',
 		// 17
 		'(\\/)@[\\s\\S]*?',
@@ -193,7 +193,7 @@ function templateToFnBodyExpression(tmpl, opts) {
 			} else if (tmpl[i + 4]) {
 				endPush();
 				js.push(' ' + tmpl[i + 4]);
-			} else if (tmpl[i + 8]) {
+			} else if (tmpl[i + 7]) {
 				endPush();
 
 				let elseIf = tmpl[i + 5];
@@ -208,11 +208,11 @@ function templateToFnBodyExpression(tmpl, opts) {
 				}
 
 				let not = tmpl[i + 6];
-				let expr = pathToExpression(tmpl[i + 8], tmpl[i + 7]);
+				let expr = pathToExpression(tmpl[i + 7], tmpl[i + 8]);
 
 				js.push(
 					(elseIf ? ' } else' : '') + ' if (' + (not ? '!' : '') +
-						(not && expr.indexOf('&&') != -1 ? '(' + expr + ')' : expr) + ') {'
+						(not && /=|&/.test(expr) ? '(' + expr + ')' : expr) + ') {'
 				);
 			} else if (tmpl[i + 9]) {
 				endPush();
@@ -264,7 +264,7 @@ function templateToFnBodyExpression(tmpl, opts) {
 				endPush();
 
 				let name = tmpl[i + 15];
-				let params = tmpl[i + 16] ? tmpl[i + 16].split(/\s*:/) : [];
+				let params = tmpl[i + 16] ? tmpl[i + 16].trim().split(/\s*:/) : [];
 
 				state.unshift({ type: 'partial' });
 
@@ -349,8 +349,8 @@ function templateToFnBodyExpression(tmpl, opts) {
 	let laterDeclaredVariables = getObjectKeys(rootScope)
 		.filter(variable => initiallyDeclaredVariables.indexOf(variable) == -1);
 
-	return 'var ' + (laterDeclaredVariables.length ? laterDeclaredVariables.sort().join(', ') + ', ' : '') + 'out = [];'
-		+ js.join('') + " return out.join('');";
+	return 'var ' + (laterDeclaredVariables.length ? laterDeclaredVariables.sort().join(', ') + ', ' : '') +
+		'out = [];' + js.join('') + " return out.join('');";
 }
 
 exports.toFnBodyExpression = templateToFnBodyExpression;

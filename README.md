@@ -15,8 +15,8 @@ Simple and fastest javascript template engine.
 `{{??}}` - else  
 `{{/?[ comment ]}}` - end if
 
-`{{? varName = a.b.c }}` - `if` with saving value to variable  
-`{{?? varName = a.b.c }}` - `else if` with saving value to variable
+`{{? a.b.c :c }}` - `if` with saving value to variable  
+`{{?? a.b.c :c }}` - `else if` with saving value to variable
 
 `{{~ a.b.c :value[ :key] }}` - for  
 `{{/~[ comment ]}}` - end for
