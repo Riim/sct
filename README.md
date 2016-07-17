@@ -59,7 +59,7 @@ Use [sct-loader](https://www.npmjs.com/package/sct-loader).
 {{~users :user }}
     {{? user?.firstName }}
         <li>{{user.firstName}}</li>
-    {{?? ln=user?.lastName }}
+    {{?? user?.lastName :ln }}
         <li>{{ln}}</li>
     {{??}}
         <li>No name</li>
